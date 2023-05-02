@@ -26,7 +26,7 @@
             return Task.FromResult($"Your book '{title}' has been ordered from Amazon.com.");
         }
 
-        [Tool(Name = "cancel_book_order", Description = "Cancels an order for a particular book. Input should be the title of a book.")]
+        [Tool(Name = "cancel_book_order", Description = "Cancels an order for a particular book. For example, if the book is no longer wanted. Input should be the title of a book.")]
         public static Task<string> BookOrderCancelAsync(string title)
         {
             return Task.FromResult($"The order for the book '{title}' has been cancelled.");
