@@ -31,29 +31,31 @@ namespace DotNetChat
                 {
                     ConsoleLogger.LogFinalAnswer();
 
-                    AddToTranscript(transcript, llmResponse.ActionInput);
+                    transcript.Add(llmResponse.ActionInput);
                     return;
-                }
-                else if (ShouldWeExecuteATool(llmResponse))
-                {
-                    var toolResponse = await ExecuteToolAsync(llmResponse);
-
-                    ConsoleLogger.LogToolResponse(toolResponse.Item1);
-
-                    if (toolResponse.Item2)
-                    {
-                        // return direct
-                        AddToTranscript(transcript, toolResponse.Item1);
-                        return;
-                    }
-                    else
-                    {
-                        messages = _messageFactory.CreateMessagesFollowingToolExecution(transcript, _tools.Values, llmResponse.ToJson(), toolResponse.Item1);
-                    }
                 }
                 else
                 {
-                    throw new Exception($"tool '{llmResponse.Action}' was not recognized.");
+                    if (_tools.TryGetValue(llmResponse.Action, out var tool))
+                    {
+                        var toolResponse = await tool.Function(llmResponse.ActionInput);
+
+                        ConsoleLogger.LogToolResponse(toolResponse);
+
+                        if (tool.ReturnDirect)
+                        {
+                            transcript.Add(toolResponse);
+                            return;
+                        }
+                        else
+                        {
+                            messages = _messageFactory.CreateMessagesFollowingToolExecution(transcript, _tools.Values, llmResponse.ToJson(), toolResponse);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception($"tool '{llmResponse.Action}' was not recognized.");
+                    }
                 }
             }
 
@@ -78,24 +80,7 @@ namespace DotNetChat
             return new LlmResponse(response.Value.Choices[0].Message.Content);
         }
 
-        private async Task<(string, bool)> ExecuteToolAsync(LlmResponse llmResponse)
-        {
-            var tool = _tools[llmResponse.Action];
-
-            return (await tool.Function(llmResponse.ActionInput), tool.ReturnDirect);
-        }
-
         private bool DoWeHaveTheFinalAnswer(LlmResponse llmResponse) => llmResponse.Action == "Final Answer";
-
-        private bool ShouldWeExecuteATool(LlmResponse llmResponse) => _tools.ContainsKey(llmResponse.Action);
-
-        private void AddToTranscript(List<string> transcript, string response)
-        {
-            if (!string.IsNullOrEmpty(response))
-            {
-                transcript.Add(response);
-            }
-        }
 
         private class LlmResponse
         {
