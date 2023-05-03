@@ -31,16 +31,25 @@ namespace DotNetChat
                 {
                     ConsoleLogger.LogFinalAnswer();
 
-                    AddToTranscript(transcript, llmResponse);
+                    AddToTranscript(transcript, llmResponse.ActionInput);
                     return;
                 }
                 else if (ShouldWeExecuteATool(llmResponse))
                 {
                     var toolResponse = await ExecuteToolAsync(llmResponse);
 
-                    ConsoleLogger.LogToolResponse(toolResponse);
+                    ConsoleLogger.LogToolResponse(toolResponse.Item1);
 
-                    messages = _messageFactory.CreateMessagesFollowingToolExecution(transcript, _tools.Values, llmResponse.ToJson(), toolResponse);
+                    if (toolResponse.Item2)
+                    {
+                        // return direct
+                        AddToTranscript(transcript, toolResponse.Item1);
+                        return;
+                    }
+                    else
+                    {
+                        messages = _messageFactory.CreateMessagesFollowingToolExecution(transcript, _tools.Values, llmResponse.ToJson(), toolResponse.Item1);
+                    }
                 }
                 else
                 {
@@ -69,20 +78,22 @@ namespace DotNetChat
             return new LlmResponse(response.Value.Choices[0].Message.Content);
         }
 
-        private async Task<string> ExecuteToolAsync(LlmResponse llmResponse)
+        private async Task<(string, bool)> ExecuteToolAsync(LlmResponse llmResponse)
         {
-            return await _tools[llmResponse.Action].Function(llmResponse.ActionInput);
+            var tool = _tools[llmResponse.Action];
+
+            return (await tool.Function(llmResponse.ActionInput), tool.ReturnDirect);
         }
 
         private bool DoWeHaveTheFinalAnswer(LlmResponse llmResponse) => llmResponse.Action == "Final Answer";
 
         private bool ShouldWeExecuteATool(LlmResponse llmResponse) => _tools.ContainsKey(llmResponse.Action);
 
-        private void AddToTranscript(List<string> transcript, LlmResponse llmResponse)
+        private void AddToTranscript(List<string> transcript, string response)
         {
-            if (!string.IsNullOrEmpty(llmResponse.ActionInput))
+            if (!string.IsNullOrEmpty(response))
             {
-                transcript.Add(llmResponse.ActionInput);
+                transcript.Add(response);
             }
         }
 

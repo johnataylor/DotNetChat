@@ -6,12 +6,15 @@
 
         public string Description { get; init; }
 
+        public bool ReturnDirect { get; init; }
+
         public Func<string, Task<string>> Function { get; init; }
 
-        public Tool(string name, string description, Func<string, Task<string>> function)
+        public Tool(string name, string description, bool returnDirect, Func<string, Task<string>> function)
         {
             Name = name;
             Description = description;
+            ReturnDirect = returnDirect;
             Function = function;
         }
     }

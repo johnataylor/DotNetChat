@@ -20,10 +20,10 @@
             }
         }
 
-        [Tool(Name = "book_purchase", Description = "Executes a purchase of a book from Amazon.com. Input should be the title of a book.")]
+        [Tool(Name = "book_purchase", Description = "Executes a purchase of a book from Amazon.com. Input should be the title of a book.", ReturnDirect = true)]
         public static Task<string> BookPurchaseAsync(string title)
         {
-            return Task.FromResult($"Your book '{title}' has been ordered from Amazon.com.");
+            return Task.FromResult($"Most excellent news! Your book '{title}' has been ordered from Amazon.com.");
         }
 
         [Tool(Name = "cancel_book_order", Description = "Cancels an order for a particular book. For example, if the book is no longer wanted. Input should be the title of a book.")]

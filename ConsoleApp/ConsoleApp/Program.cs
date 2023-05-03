@@ -58,8 +58,11 @@ static List<Tool> GetTools<T>()
         var attribute = (ToolAttribute?)methodInfo.GetCustomAttributes(typeof(ToolAttribute), false).FirstOrDefault();
         if (attribute != null)
         {
-            var tool = new Tool(attribute?.Name ?? methodInfo.Name, attribute?.Description ?? methodInfo.Name, methodInfo.CreateDelegate<Func<string, Task<string>>>());
-            tools.Add(tool);
+            var name = attribute.Name ?? methodInfo.Name;
+            var description = attribute.Description ?? methodInfo.Name;
+            var returnDirect = attribute.ReturnDirect;
+            var function = methodInfo.CreateDelegate<Func<string, Task<string>>>();
+            tools.Add(new Tool(name, description, returnDirect, function));
         }
     }
     return tools;
