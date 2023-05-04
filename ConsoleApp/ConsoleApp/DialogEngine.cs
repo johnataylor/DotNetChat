@@ -27,7 +27,7 @@ namespace DotNetChat
 
                 ConsoleLogger.LogLlmResponse(llmResponse.ToJson());
 
-                if (DoWeHaveTheFinalAnswer(llmResponse))
+                if (llmResponse.Action == "Final Answer")
                 {
                     ConsoleLogger.LogFinalAnswer();
 
@@ -79,8 +79,6 @@ namespace DotNetChat
 
             return new LlmResponse(response.Value.Choices[0].Message.Content);
         }
-
-        private bool DoWeHaveTheFinalAnswer(LlmResponse llmResponse) => llmResponse.Action == "Final Answer";
 
         private class LlmResponse
         {

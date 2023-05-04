@@ -21,6 +21,7 @@
         }
 
         [Tool(Name = "book_purchase", Description = "Executes a purchase of a book from Amazon.com. Input should be the title of a book.", ReturnDirect = true)]
+        //[Tool(Name = "book_purchase", Description = "Executes a purchase of a book from Amazon.com. Input should be the title of a book.")]
         public static Task<string> BookPurchaseAsync(string title)
         {
             return Task.FromResult($"Most excellent news! Your book '{title}' has been ordered from Amazon.com.");
