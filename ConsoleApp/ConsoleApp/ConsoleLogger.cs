@@ -1,4 +1,5 @@
 ﻿using Azure.AI.OpenAI;
+using System.Text.Json;
 
 namespace DotNetChat
 {
@@ -6,7 +7,7 @@ namespace DotNetChat
     {
         public static void LogPrompt(IEnumerable<ChatMessage> messages)
         {
-            //string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions { WriteIndented = true });
+            string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions { WriteIndented = true });
             //Console.WriteLine(jsonString);
         }
 

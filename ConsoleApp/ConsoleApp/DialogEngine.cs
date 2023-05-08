@@ -21,7 +21,7 @@ namespace DotNetChat
         {
             var messages = _messageFactory.CreateMessagesFollowingHumanInput(transcript, _tools.Values);
 
-            for(var i=0; i<MaxAttempts; i++)
+            for (var i=0; i<MaxAttempts; i++)
             {
                 var llmResponse = await RunLlmAsync(messages);
 

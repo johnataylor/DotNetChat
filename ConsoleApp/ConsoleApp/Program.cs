@@ -1,10 +1,11 @@
 ﻿using DotNetChat;
+using System.Linq.Expressions;
 
 static async Task Test0()
 {
     try
     {
-        var agent = await CreateAgentAsync();
+        var agent = await CreateAgentAsync<BookTools>();
         await StepAsync(agent, "I am thinking about buying a copy of the Python Cookbook where is it available?");
         await StepAsync(agent, "ok that sounds good, order me a copy");
         await StepAsync(agent, "actually I changed my mind, I don't want that book after all");
@@ -18,7 +19,7 @@ static async Task Test1()
 {
     try
     {
-        var agent = await CreateAgentAsync();
+        var agent = await CreateAgentAsync<BookTools>();
         await StepAsync(agent, "I am thinking about buying a copy of the Python Cookbook where is it available?");
         await StepAsync(agent, "ok that sounds good, order me a copy");
         await StepAsync(agent, "so who actually wrote the song Because The Night for Patti Smith?");
@@ -30,8 +31,37 @@ static async Task Test1()
     }
 }
 
-await Test0();
+static async Task Test2()
+{
+    try
+    {
+        var agent = await CreateAgentAsync<DatabaseTools>();
+        while (true)
+        {
+            Console.Write("user: ");
+            var userInput = Console.ReadLine() ?? string.Empty;
+
+            if (userInput == "exit")
+            {
+                break;
+            }
+
+            var response = await agent.RunAsync(userInput);
+
+            Console.WriteLine($"assistant: {response}");
+        }
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine("exception...");
+        ConsoleLogger.LogException(e);
+    }
+}
+
+
+//await Test0();
 //await Test1();
+await Test2();
 
 // some helper code to simplify our tests
 
@@ -42,9 +72,9 @@ static async Task StepAsync(Agent agent, string userInput)
     await Console.Out.WriteLineAsync($"assistant: {response}");
 }
 
-static async Task<Agent> CreateAgentAsync()
+static async Task<Agent> CreateAgentAsync<T>()
 {
-    var tools = GetTools<BookTools>();
+    var tools = GetTools<T>();
     var messageFactory = await new MessageFactoryFactory().CreateAsync();
     string apiKey = File.ReadAllText(@"C:\keys\openai.txt");
     return new Agent(tools, messageFactory, apiKey);
