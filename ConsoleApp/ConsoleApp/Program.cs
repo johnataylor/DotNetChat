@@ -35,20 +35,26 @@ static async Task Test2()
 {
     try
     {
-        var agent = await CreateAgentAsync<DatabaseTools>();
+        //var agent = await CreateAgentAsync<DatabaseTools>();
+        var agent = await CreateAgentAsync<BookTools>();
         while (true)
         {
             Console.Write("user: ");
             var userInput = Console.ReadLine() ?? string.Empty;
 
-            if (userInput == "exit")
+            if (userInput == "bye")
             {
                 break;
             }
 
-            var response = await agent.RunAsync(userInput);
+            if (userInput.ToLower().Trim() == string.Empty)
+            {
+                continue;
+            }
 
-            Console.WriteLine($"assistant: {response}");
+            var assistantResponse = await agent.RunAsync(userInput);
+
+            Console.WriteLine($"assistant: {assistantResponse}");
         }
     }
     catch (Exception e)

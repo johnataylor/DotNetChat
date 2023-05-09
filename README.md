@@ -37,7 +37,7 @@ tools = [
 
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 llm=ChatOpenAI(temperature=0)
-agent = initialize_agent(tools, llm, agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION, verbose=True, memory=memory)
+agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=memory)
 
 step(agent, "I am thinking about buying a copy of the Python Cookbook where is it available?")
 step(agent, "ok that sounds good, order me a copy")
