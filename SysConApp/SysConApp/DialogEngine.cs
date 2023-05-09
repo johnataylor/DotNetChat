@@ -36,9 +36,11 @@ namespace SysConApp
 
         private static List<ChatMessage> CreateMessages(List<string> transcript, string context)
         {
+            var initialSystemMessage = "Assistant is a large language model trained by OpenAI.";
+
             var messages = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.System, "Assistant is a large language model trained by OpenAI.")
+                new ChatMessage(ChatRole.System, initialSystemMessage)
             };
 
             var role = ChatRole.User;
@@ -48,12 +50,10 @@ namespace SysConApp
                 role = role == ChatRole.User ? ChatRole.Assistant : ChatRole.User;
             }
 
-            if (string.IsNullOrEmpty(context))
+            if (!string.IsNullOrEmpty(context))
             {
-                context = "EMPTY";
+                messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using ONLY this content: {context}. If you cannot answer the question, say 'Sorry, I don't know the answer to this one'"));
             }
-
-            messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using ONLY this content: {context}. If you cannot answer the question, say 'Sorry, I don't know the answer to this one'"));
 
             return messages;
         }

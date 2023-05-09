@@ -1,51 +1,31 @@
 ﻿
 using SysConApp;
+using System.Reflection.Metadata.Ecma335;
 
 async Task Test0()
 {
     try
     {
-        var context = new List<string>();
-
         var agent = CreateAgent();
         while (true)
         {
             Console.Write("user: ");
             var userInput = Console.ReadLine() ?? string.Empty;
 
-            if (userInput == "bye")
+            var (quit, command) = ProcessCommand(agent, userInput);
+
+            if (quit)
             {
                 break;
             }
 
-            if (userInput.Trim() == string.Empty)
+            if (command)
             {
                 continue;
             }
 
-            if (userInput == "clear-transcript")
-            {
-                agent = CreateAgent();
-                continue;
-            }
-
-            if (userInput == "clear-context")
-            {
-                context.Clear();
-                continue;
-            }
-
-            if (userInput.StartsWith("context:"))
-            {
-                context.Add(userInput.Split(':')[1]);
-                continue;
-            }
-
-            var contextContent = string.Join('\n', context);
-
-            var response = await agent.RunAsync(userInput, contextContent);
-
-            Console.WriteLine($"assistant: {response}");
+            var assistantResponse = await agent.RunAsync(userInput);
+            Console.WriteLine($"assistant: {assistantResponse}");
         }
     }
     catch (Exception e)
@@ -56,6 +36,50 @@ async Task Test0()
 }
 
 await Test0();
+
+static (bool, bool) ProcessCommand(Agent agent, string userInput)
+{
+    if (userInput == "bye")
+    {
+        return (true, true);
+    }
+
+    switch (userInput.ToLower().Trim())
+    {
+        case "":
+            return (false, true);
+
+        case "clear-transcript":
+            agent.Transcript.Clear();
+            return (false, true);
+
+        case "clear-context":
+            agent.Context.Clear();
+            return (false, true);
+
+        case "dump-transcript":
+            foreach (var line in agent.Transcript)
+            {
+                Console.WriteLine($"  {line}");
+            }
+            return (false, true);
+
+        case "dump-context":
+            foreach (var line in agent.Context)
+            {
+                Console.WriteLine($"  {line}");
+            }
+            return (false, true);
+    }
+
+    if (userInput.StartsWith("context:"))
+    {
+        agent.Context.Add(userInput.Split(':')[1]);
+        return (false, true);
+    }
+
+    return (false, false);
+}
 
 static Agent CreateAgent()
 {

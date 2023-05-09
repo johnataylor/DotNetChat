@@ -2,19 +2,20 @@
 {
     public class Agent
     {
-        private readonly List<string> _transcript = new List<string>();
         private readonly DialogEngine _dialogEngine;
 
         public Agent(string apiKey)
         {
             _dialogEngine = new DialogEngine(apiKey);
         }
+        public List<string> Transcript { get; init; } = new List<string>();
+        public List<string> Context { get; init; } = new List<string>();
 
-        public async Task<string> RunAsync(string userInput, string context)
+        public async Task<string> RunAsync(string userInput)
         {
-            _transcript.Add(userInput);
-            await _dialogEngine.RunAsync(_transcript, context);
-            return _transcript.Last();
+            Transcript.Add(userInput);
+            await _dialogEngine.RunAsync(Transcript, string.Join('\n', Context));
+            return Transcript.Last();
         }
     }
 }
