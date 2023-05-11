@@ -52,7 +52,7 @@ namespace SysConApp
 
             if (!string.IsNullOrEmpty(context))
             {
-                messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using ONLY this content: {context}. If you cannot answer the question, say 'Sorry, I don't know the answer to this one'"));
+                messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using ONLY this content: {context}. If you cannot answer the question, you MUST say just 'Sorry, I don't know the answer to this one'."));
             }
 
             return messages;
