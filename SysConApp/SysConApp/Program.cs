@@ -29,20 +29,20 @@ async Task Test0()
 
             var assistantResponse = await agent.RunAsync(userInput);
 
-            if (assistantResponse.Contains("Sorry, I don't know the answer"))
-            {
-                // update conversation state in the 'system' message
-                agent.Context.Clear();
+            //if (assistantResponse.Contains("Sorry, I don't know the answer"))
+            //{
+            //    // update conversation state in the 'system' message
+            //    agent.Context.Clear();
 
-                var content = await AttemptToFetchMoreDataAsync(agent.Transcript, userInput);
-                agent.Context.Add(content);
+            //    var content = await AttemptToFetchMoreDataAsync(agent.Transcript, userInput);
+            //    agent.Context.Add(content);
 
-                // pop the last (unsucessful) result
-                agent.Transcript.RemoveAt(agent.Transcript.Count - 1);
+            //    // pop the last (unsucessful) result
+            //    agent.Transcript.RemoveAt(agent.Transcript.Count - 1);
 
-                // rerun the user input against the updated agent
-                assistantResponse = await agent.RunAsync(userInput);
-            }
+            //    // rerun the user input against the updated agent
+            //    assistantResponse = await agent.RunAsync(userInput);
+            //}
 
             Console.WriteLine($"assistant: {assistantResponse}");
         }
