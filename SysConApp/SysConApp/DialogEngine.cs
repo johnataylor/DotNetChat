@@ -23,6 +23,7 @@ namespace SysConApp
             var openAIClient = new OpenAIClient(_apiKey, new OpenAIClientOptions());
 
             var chatCompletionOptions = new ChatCompletionsOptions();
+            chatCompletionOptions.Temperature = 0;
 
             foreach (var message in messages)
             {
@@ -44,15 +45,25 @@ namespace SysConApp
             };
 
             var role = ChatRole.User;
-            for (int i = 0; i < transcript.Count; i++)
+            for (int i = 0; i < transcript.Count - 1; i++)
             {
                 messages.Add(new ChatMessage(role, transcript[i]));
                 role = role == ChatRole.User ? ChatRole.Assistant : ChatRole.User;
             }
 
-            if (!string.IsNullOrEmpty(context))
+            if (transcript.Count > 0)
             {
-                messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using ONLY this content: {context}. If you cannot answer the question, you MUST say just 'Sorry, I don't know the answer to this one'."));
+
+                if (!string.IsNullOrEmpty(context))
+                {
+                    //messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using the following content: ```{context}```. If you cannot answer the question, you MUST say 'Sorry, I don't know the answer.'."));
+                    //messages.Add(new ChatMessage(ChatRole.User, $"If the question concerns work orders say YEAH ITS A WORK ORDER."));
+
+                    var question = transcript[transcript.Count - 1];
+                    var lastMessage = $"If the question concerns work orders say exactly: 'ITS A WORK ORDER QUESTION'.\n\nHere is the question:\n\n{question}.";
+
+                    messages.Add(new ChatMessage(ChatRole.User, $"If the question concerns work orders say YEAH ITS A WORK ORDER."));
+                }
             }
 
             return messages;

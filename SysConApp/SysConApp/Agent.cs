@@ -17,5 +17,10 @@
             await _dialogEngine.RunAsync(Transcript, string.Join('\n', Context));
             return Transcript.Last();
         }
+
+        public void RemoveLast()
+        {
+            Transcript.RemoveAt(Transcript.Count - 1);
+        }
     }
 }
