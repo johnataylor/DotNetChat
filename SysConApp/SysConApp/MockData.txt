@@ -1,0 +1,11 @@
+﻿Question: what is the summary of work order 00052
+Answer: Install car tires
+
+Question: when was work order 00049 created
+Answer: created on 5/13/2023 7:15PM
+
+Question: give me all completed work orders
+Answer: 00005, 00024, 000036, 00042, 00044, 00048
+
+Question: what is the incident type for work order 00004
+Answer: the incident type is Thermostat is broken

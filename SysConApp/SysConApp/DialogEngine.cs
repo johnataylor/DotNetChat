@@ -1,15 +1,20 @@
 ﻿using Azure.AI.OpenAI;
+using System.Text;
 
 namespace SysConApp
 {
     internal class DialogEngine
     {
+        private const string Model = "gpt-3.5-turbo";
+
         private readonly string _apiKey;
 
         public DialogEngine(string apiKey)
         {
             _apiKey = apiKey;
         }
+
+        public bool Verbose { get; set; }
 
         public async Task RunAsync(List<string> transcript, string context)
         {
@@ -30,18 +35,33 @@ namespace SysConApp
                 chatCompletionOptions.Messages.Add(message);
             }
 
-            var response = await openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionOptions);
+            if (Verbose)
+            {
+                ConsoleLogger.LogPrompt(messages);
+            }
 
-            return response.Value.Choices[0].Message.Content;
+            var response = await openAIClient.GetChatCompletionsAsync(Model, chatCompletionOptions);
+            var content = response.Value.Choices[0].Message.Content;
+
+            if (Verbose)
+            {
+                ConsoleLogger.LogResponse(content);
+            }
+
+            return content;
         }
 
         private static List<ChatMessage> CreateMessages(List<string> transcript, string context)
         {
-            var initialSystemMessage = "Assistant is a large language model trained by OpenAI.";
+            var contextContent = string.IsNullOrEmpty(context) ? "NOTHING" : context;
+
+            var systemMessage = new StringBuilder();
+            systemMessage.AppendLine("Assistant is a large language model trained by OpenAI.");
+            systemMessage.AppendLine($"The following content can be used to answer questions: ```{contextContent}```.");
 
             var messages = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.System, initialSystemMessage)
+                new ChatMessage(ChatRole.System, systemMessage.ToString())
             };
 
             var role = ChatRole.User;
@@ -51,20 +71,14 @@ namespace SysConApp
                 role = role == ChatRole.User ? ChatRole.Assistant : ChatRole.User;
             }
 
-            if (transcript.Count > 0)
-            {
+            var question = transcript[transcript.Count - 1];
 
-                if (!string.IsNullOrEmpty(context))
-                {
-                    //messages.Add(new ChatMessage(ChatRole.System, $"Answer the user's question using the following content: ```{context}```. If you cannot answer the question, you MUST say 'Sorry, I don't know the answer.'."));
-                    //messages.Add(new ChatMessage(ChatRole.User, $"If the question concerns work orders say YEAH ITS A WORK ORDER."));
+            var lastMessage = new StringBuilder();
+            lastMessage.AppendLine("Answer the question using the content provided in this conversation. If you are unable to answer the question, you MUST say ```NO DATA``` and NOTHING ELSE.");
+            lastMessage.AppendLine();
+            lastMessage.AppendLine($"Question: ```{question}```");
 
-                    var question = transcript[transcript.Count - 1];
-                    var lastMessage = $"If the question concerns work orders say exactly: 'ITS A WORK ORDER QUESTION'.\n\nHere is the question:\n\n{question}.";
-
-                    messages.Add(new ChatMessage(ChatRole.User, $"If the question concerns work orders say YEAH ITS A WORK ORDER."));
-                }
-            }
+            messages.Add(new ChatMessage(ChatRole.User, lastMessage.ToString()));
 
             return messages;
         }
