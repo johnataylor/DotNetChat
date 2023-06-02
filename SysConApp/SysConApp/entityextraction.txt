@@ -1,0 +1,11 @@
+﻿given the following types of entity:
+- work order
+- account
+- schedule
+- address
+
+which of these does the following question concern and what is the value:
+``` what is the summary of work order 00052```
+
+Entity: work order
+Value: 00052

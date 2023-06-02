@@ -4,12 +4,14 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Nodes;
+using Azure.Identity;
+using Azure.Core;
 
 async Task Test0()
 {
     try
     {
-        var agent = CreateAgent();
+        var agent = await CreateAgentAsync();
 
         while (true)
         {
@@ -90,60 +92,103 @@ static (bool, bool) ProcessCommand(Agent agent, string userInput)
     return (false, false);
 }
 
-static Agent CreateAgent()
+async Task<Agent> CreateAgentAsync()
 {
     string apiKey = File.ReadAllText(@"C:\keys\openai.txt");
-    return new Agent(apiKey, AttemptToFetchMoreDataAsync);
+
+    var cred = new DefaultAzureCredential(
+        new DefaultAzureCredentialOptions
+        {
+            ExcludeVisualStudioCredential = true,
+            ExcludeInteractiveBrowserCredential = false,
+            InteractiveBrowserCredentialClientId = "51f81489-12ee-4a9e-aaae-a2591f45987d",
+        });
+    var accessToken = await cred.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { "https://aurorabapenvc1989.crm10.dynamics.com/user_impersonation" }));
+
+    return new Agent(apiKey, FetchStructuredDataAsync, FetchUnstructuredDataAsync, accessToken);
 }
 
-static async Task<string> AttemptToFetchMoreDataAsync(string queryText)
+static async Task<string> FetchStructuredDataAsync(string queryText, AccessToken accessToken, bool verbose)
 {
-    /*
-    var cert = File.ReadAllText(@"..\..\..\ck.txt");
-
-    using HttpClient client = new();
-    HttpRequestHeaders headers = client.DefaultRequestHeaders;
-    headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    headers.Add("Host", "aurorabapenvc1989.crm10.dynamics.com");
-    headers.Add("Authorization", $"Bearer {cert}");
-
-    var requestBody = new
+    try
     {
-        queryText = queryText,
-        //entityParameters = new[] { new { name = "msdyn_workorderproduct" }, new { name = "msdyn_workorder" }, new { name = "msdyn_workorderservicetask" }, new { name = "msdyn_priority" } }
-    };
+        using HttpClient client = new();
+        HttpRequestHeaders headers = client.DefaultRequestHeaders;
+        headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        headers.Add("Host", "aurorabapenvc1989.crm10.dynamics.com");
+        headers.Add("Authorization", $"Bearer {accessToken.Token}");
 
-    var json = JsonSerializer.Serialize(requestBody);
-    var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var requestBody = new
+        {
+            queryText = queryText,
+            //entityParameters = new[] { new { name = "msdyn_workorderproduct" }, new { name = "msdyn_workorder" }, new { name = "msdyn_workorderservicetask" }, new { name = "msdyn_priority" } }
+        };
 
-    HttpResponseMessage response = await client.PostAsync("https://aurorabapenvc1989.crm10.dynamics.com/api/copilot/v1.0/QueryStructuredData", content);
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-    var responseContent = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await client.PostAsync("https://aurorabapenvc1989.crm10.dynamics.com/api/copilot/v1.0/QueryStructuredData", content);
 
-    var obj = JsonNode.Parse(responseContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
 
-    var summary = obj?["queryResult"]?["summary"]?.GetValue<string>() ?? string.Empty;
+        var obj = JsonNode.Parse(responseContent);
 
-    return summary;
-    */
+        var sql = obj?["query"]?["tSql"]?.GetValue<string>() ?? string.Empty;
 
-    // mock results
+        if (verbose)
+        {
+            ConsoleLogger.LogGeneratedSql(sql);
+        }
 
-    switch (queryText)
+        var summary = obj?["queryResult"]?["summary"]?.GetValue<string>() ?? string.Empty;
+
+        return summary;
+    }
+    catch (Exception ex)
     {
-        case "what is the summary of work order 00052":
-            return "The summary of work order 00052 is Install car tires.";
-
-        case "when was work order 00049 created":
-            return "00049 was created on 5/13/2023 7:15PM.";
-
-        case "give me all completed work orders":
-            return "The completed work orders are 00005, 00024, 00036, 00042, 00044, 00048.";
-
-        case "what is the incident type for work order 00004":
-            return "the incident type is Thermostat is broken";
-
-        default:
-            return string.Empty;
+        await Console.Out.WriteLineAsync(ex.Message);
+        if (ex.InnerException != null)
+        {
+            await Console.Out.WriteLineAsync(ex.InnerException.Message);
+        }
+        throw;
     }
 }
+
+static async Task<string> FetchUnstructuredDataAsync(string queryText, AccessToken accessToken, bool verbose)
+{
+    try
+    {
+        using HttpClient client = new();
+        HttpRequestHeaders headers = client.DefaultRequestHeaders;
+        headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        headers.Add("Host", "aurorabapenvc1989.crm10.dynamics.com");
+        headers.Add("Authorization", $"Bearer {accessToken.Token}");
+
+        var requestBody = new
+        {
+            searchText = queryText,
+            entityParameters = new[] { new { name = "msdyn_kbattachment" } },
+            totalResultCount = true,
+            top = 1
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await client.PostAsync("https://aurorabapenvc1989.crm10.dynamics.com/api/copilot/v1.0/QueryTextContext", content);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        return responseContent;
+    }
+    catch (Exception ex)
+    {
+        await Console.Out.WriteLineAsync(ex.Message);
+        if (ex.InnerException != null)
+        {
+            await Console.Out.WriteLineAsync(ex.InnerException.Message);
+        }
+        throw;
+    }
+}
+

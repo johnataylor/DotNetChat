@@ -1,14 +1,24 @@
-﻿namespace SysConApp
+﻿using Azure.Core;
+
+namespace SysConApp
 {
     public class Agent
     {
         private readonly DialogEngine _dialogEngine;
-        private readonly Func<string, Task<string>> _fetch;
+        private readonly Func<string, AccessToken, bool, Task<string>> _structuredFetch;
+        private readonly Func<string, AccessToken, bool, Task<string>> _unstructuredFetch;
+        private readonly AccessToken _accessToken;
 
-        public Agent(string apiKey, Func<string, Task<string>> fetch)
+        public Agent(
+            string apiKey,
+            Func<string, AccessToken, bool, Task<string>> structuredFetch,
+            Func<string, AccessToken, bool, Task<string>> unstructuredFetch,
+            AccessToken accessToken)
         {
             _dialogEngine = new DialogEngine(apiKey);
-            _fetch = fetch;
+            _structuredFetch = structuredFetch;
+            _unstructuredFetch = unstructuredFetch;
+            _accessToken = accessToken;
         }
 
         public bool Verbose
@@ -28,13 +38,23 @@
             {
                 // (1) the question couldn't be answered so attempt to access the external data source
 
-                var content = await _fetch(userInput);
+                if (Verbose)
+                {
+                    ConsoleLogger.LogQuery(userInput);
+                }
+
+                var result = await _structuredFetch(userInput, _accessToken, Verbose);
+
+                if (Verbose)
+                {
+                    ConsoleLogger.LogQuery(result);
+                }
 
                 // (2) add the new data to the context (this will end out in the system message)
 
-                Context.Add(content);
+                Context.Add(result);
 
-                // (3) clean the failed exchanged from our transcript
+                // (3) clean the failed exchange from our transcript
 
                 TranscriptRemoveLast();
                 TranscriptRemoveLast();
@@ -45,15 +65,49 @@
 
                 if (assistantResponse.Contains("NO DATA"))
                 {
-                    // (5) if we still can't answer the question we are done, inform the user
+                    // (5) if we still can't answer the question with the structured endpoint try the unstructured
 
-                    assistantResponse = "I'm sorry but I'm unable to answer your question.";
+                    if (Verbose)
+                    {
+                        ConsoleLogger.LogQuery(userInput);
+                    }
+
+                    var unstructuredResult = await _unstructuredFetch(userInput, _accessToken, Verbose);
+
+                    if (Verbose)
+                    {
+                        ConsoleLogger.LogQueryResult(unstructuredResult);
+                    }
+
+                    // (6) add the new data to the context (this will end out in the system message)
+
+                    Context.Add(unstructuredResult);
+
+                    // (7) clean the failed exchange from our transcript
+
                     TranscriptRemoveLast();
-                    Transcript.Add(assistantResponse);
+                    TranscriptRemoveLast();
+
+                    // (8) and have another go at answering the question (remember this time we have the external content)
+
+                    assistantResponse = await InnerRunAsync(userInput);
+
+                    if (assistantResponse.Contains("NO DATA"))
+                    {
+                        assistantResponse = "I'm sorry but I'm unable to answer your question.";
+                        TranscriptRemoveLast();
+                        Transcript.Add(assistantResponse);
+                    }
+                    else
+                    {
+                        // (9) success, now we have the answer in the transcript, we can clean it out of the context
+
+                        ContextRemoveLast();
+                    }
                 }
                 else
                 {
-                    // (6) success, now we have the answer in the transcript, we can clean it out of the context
+                    // (10) success, now we have the answer in the transcript, we can clean it out of the context
 
                     ContextRemoveLast();
                 }

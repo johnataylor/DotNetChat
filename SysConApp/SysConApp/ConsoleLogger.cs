@@ -21,7 +21,31 @@ namespace SysConApp
         {
             var color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"response: {response}");
+            Console.WriteLine($"gpt-response: {response}");
+            Console.ForegroundColor = color;
+        }
+
+        public static void LogQuery(string query)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"query: {query}");
+            Console.ForegroundColor = color;
+        }
+
+        public static void LogQueryResult(string result)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"query-result: {result}");
+            Console.ForegroundColor = color;
+        }
+
+        public static void LogGeneratedSql(string sql)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"SQL: {sql}");
             Console.ForegroundColor = color;
         }
     }
