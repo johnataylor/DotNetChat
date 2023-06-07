@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orchestrator", "Orchestrator\Orchestrator.csproj", "{3B8708D5-9C88-4C48-AF83-D41472A9240A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{F23146B0-9F10-4F87-A644-29C1FBB687CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B8708D5-9C88-4C48-AF83-D41472A9240A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B8708D5-9C88-4C48-AF83-D41472A9240A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B8708D5-9C88-4C48-AF83-D41472A9240A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B8708D5-9C88-4C48-AF83-D41472A9240A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F23146B0-9F10-4F87-A644-29C1FBB687CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F23146B0-9F10-4F87-A644-29C1FBB687CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F23146B0-9F10-4F87-A644-29C1FBB687CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F23146B0-9F10-4F87-A644-29C1FBB687CC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ECEAEEAC-AC1A-47ED-8639-8C7B3C28D907}
+	EndGlobalSection
+EndGlobal
