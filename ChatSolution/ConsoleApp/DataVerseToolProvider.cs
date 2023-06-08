@@ -28,6 +28,7 @@ namespace ConsoleApp
                 new Tool(
                     "work-orders",
                     "provides access to information about work orders, takes a natural language query as input",
+                    //"provides access to information about work orders, takes a natural language query as input, if you have a work order number make sure to include that in the query, if there is any ambiguity please use the last work order number mentioned",
                     false,
                     QueryWorkOrders
                 ),
@@ -51,12 +52,14 @@ namespace ConsoleApp
         private async Task<string> QueryWorkOrders(string query)
         {
             await EnsureAccessTokenIsInitialized();
-            return await FetchStructuredDataAsync(query, new string[] { }, _accessToken, true);
+            var tables = new string[] { "msdyn_workorderproduct", "msdyn_workorder", "msdyn_workorderservicetask", "msdyn_priority" };
+            return await FetchStructuredDataAsync(query, tables, _accessToken, true);
         }
         private async Task<string> QueryAccounts(string query)
         {
             await EnsureAccessTokenIsInitialized();
-            return await FetchStructuredDataAsync(query, new string[] { }, _accessToken, true);
+            var tables = new string[] { };
+            return await FetchStructuredDataAsync(query, tables, _accessToken, true);
         }
 
         private async Task<string> QueryManuals(string query)
@@ -90,10 +93,12 @@ namespace ConsoleApp
                 headers.Add("Host", "aurorabapenvc1989.crm10.dynamics.com");
                 headers.Add("Authorization", $"Bearer {accessToken?.Token}");
 
+                tables.Select(n => new { name = n }).ToArray();
+
                 var requestBody = new
                 {
                     queryText = queryText,
-                    //entityParameters = new[] { new { name = "msdyn_workorderproduct" }, new { name = "msdyn_workorder" }, new { name = "msdyn_workorderservicetask" }, new { name = "msdyn_priority" } }
+                    entityParameters = tables.Length == 0 ? null : tables.Select(n => new { name = n }).ToArray(),
                     options = new[] { "GetResultsSummary" },
                 };
 
