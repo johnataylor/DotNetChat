@@ -5,15 +5,15 @@
         [Tool(Name = "book_info", Description = "Provides information about where to buy a particular book and how much it costs. Input should be the title of a book.")]
         public static Task<string> BookInfoAsync(string title)
         {
-            switch (title)
+            switch (title.ToLower())
             {
-                case "Python Cookbook":
+                case "python cookbook":
                     return Task.FromResult($"'{title}' is available on Amazon.com at a cost of $50.");
-                case "Moby Dick":
+                case "moby dick":
                     return Task.FromResult($"'{title}' is available on Amazon.com at a cost of $10.");
-                case "Love in the Time of Cholera":
-                case "The Catcher in the Rye":
-                case "The Great Gatsby":
+                case "love in the time of cholera":
+                case "the catcher in the rye":
+                case "the great gatsby":
                     return Task.FromResult($"'{title}' is available on Amazon.com at a cost of $15.");
                 default:
                     return Task.FromResult($"Unfortunately '{title}' is not available.");

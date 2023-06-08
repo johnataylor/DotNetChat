@@ -36,8 +36,8 @@ static async Task Test2()
     try
     {
         //var agent = await CreateAgentAsync<DatabaseTools>();
-        //var agent = await CreateAgentAsync<BookTools>();
-        var agent = await CreateAgentAsync<WorkOrderTools>();
+        var agent = await CreateAgentAsync<BookTools>();
+        //var agent = await CreateAgentAsync<WorkOrderTools>();
         while (true)
         {
             Console.Write("user: ");

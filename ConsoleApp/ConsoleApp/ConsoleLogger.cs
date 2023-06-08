@@ -8,7 +8,7 @@ namespace DotNetChat
         public static void LogPrompt(IEnumerable<ChatMessage> messages)
         {
             string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions { WriteIndented = true });
-            //Console.WriteLine(jsonString);
+            Console.WriteLine(jsonString);
         }
 
         public static void LogLlmResponse(string s)

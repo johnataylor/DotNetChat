@@ -122,6 +122,7 @@ static async Task<string> FetchStructuredDataAsync(string queryText, AccessToken
         {
             queryText = queryText,
             //entityParameters = new[] { new { name = "msdyn_workorderproduct" }, new { name = "msdyn_workorder" }, new { name = "msdyn_workorderservicetask" }, new { name = "msdyn_priority" } }
+            options = new[] { "GetResultsSummary" },
         };
 
         var json = JsonSerializer.Serialize(requestBody);
@@ -131,18 +132,41 @@ static async Task<string> FetchStructuredDataAsync(string queryText, AccessToken
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var obj = JsonNode.Parse(responseContent);
+        response.EnsureSuccessStatusCode();
 
-        var sql = obj?["query"]?["tSql"]?.GetValue<string>() ?? string.Empty;
+        var obj = JsonNode.Parse(responseContent);
 
         if (verbose)
         {
+            var sql = obj?["query"]?["tSql"]?.GetValue<string>() ?? string.Empty;
             ConsoleLogger.LogGeneratedSql(sql);
         }
 
-        var summary = obj?["queryResult"]?["summary"]?.GetValue<string>() ?? string.Empty;
+        var queryResult = obj?["queryResult"];
+        if (queryResult == null)
+        {
+            throw new Exception("no queryResult");
+        }
 
-        return summary;
+        var result = queryResult["result"];
+        if (result == null)
+        {
+            throw new Exception("no result");
+        }
+
+        if (result.AsArray().Count == 0)
+        {
+            // no data matched the query
+            return string.Empty;
+        }
+
+        var summary = queryResult["summary"];
+        if (summary == null)
+        {
+            throw new Exception("no summary");
+        }
+
+        return summary.GetValue<string>();
     }
     catch (Exception ex)
     {
