@@ -10,7 +10,7 @@ namespace Orchestrator
         private readonly MessageFactory _messageFactory;
         private readonly string _apiKey;
 
-        public ToolExecutor(List<Tool> tools, MessageFactory messageFactory, string apiKey)
+        public ToolExecutor(IEnumerable<Tool> tools, MessageFactory messageFactory, string apiKey)
         {
             _tools = tools.ToDictionary(tool => tool.Name);
             _messageFactory = messageFactory;

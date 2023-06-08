@@ -4,23 +4,22 @@ namespace Orchestrator
 {
     public class DialogEngine : IDialogEngine
     {
-        private readonly IToolProvider _toolProvider;
+        private readonly IEnumerable<Tool> _tools;
         private readonly string _apiKey;
         private readonly IMessageFactoryProvider _messageFactoryProvider;
 
-        public DialogEngine(IToolProvider toolProvider, string apiKey)
+        public DialogEngine(IEnumerable<Tool> tools, string apiKey)
         {
-            _toolProvider = toolProvider;
+            _tools = tools;
             _apiKey = apiKey;
             _messageFactoryProvider = new MessageFactoryProvider();
         }
 
         public async Task<(string newState, string assistantResponse)> RunAsync(string? oldState, string userRequest)
         {
-            var tools = await _toolProvider.GetToolsAsync();
             var messageFactory = await _messageFactoryProvider.CreateAsync();
 
-            var toolExecutor = new ToolExecutor(tools, messageFactory, _apiKey);
+            var toolExecutor = new ToolExecutor(_tools, messageFactory, _apiKey);
 
             var transcript = oldState == null ? new List<string>() : JsonSerializer.Deserialize<List<string>>(oldState) ?? new List<string>();
             

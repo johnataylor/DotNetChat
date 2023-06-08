@@ -45,13 +45,11 @@ internal class Program
 
         static IDialogEngine CreateDialogEngine()
         {
-            // var toolProvider = new ReflectionToolProvider<DataVerseTools>();
-
-            var toolProvider = new DataVerseToolProvider();
+            var dataVerseTools = new DataVerseTools();
 
             string apiKey = File.ReadAllText(@"C:\keys\openai.txt");
 
-            return new DialogEngine(toolProvider, apiKey);
+            return new DialogEngine(dataVerseTools.GetTools(), apiKey);
         }
     }
 }

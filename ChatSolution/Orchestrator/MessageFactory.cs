@@ -11,10 +11,10 @@ namespace Orchestrator
 
         public MessageFactory(string introContent, string userInputTemplate, string aiResponseTemplate, string toolResponseTemplate)
         {
-            _introContent = introContent.Replace("\r\n", "\n");
-            _userInputTemplate = userInputTemplate.Replace("\r\n", "\n");
-            _aiResponseTemplate = aiResponseTemplate.Replace("\r\n", "\n");
-            _toolResponseTemplate = toolResponseTemplate.Replace("\r\n", "\n");
+            _introContent = introContent;
+            _userInputTemplate = userInputTemplate;
+            _aiResponseTemplate = aiResponseTemplate;
+            _toolResponseTemplate = toolResponseTemplate;
         }
 
         public List<ChatMessage> CreateMessagesFollowingHumanInput(List<string> transcript, IEnumerable<Tool> tools)

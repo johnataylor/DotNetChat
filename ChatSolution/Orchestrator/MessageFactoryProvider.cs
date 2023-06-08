@@ -27,7 +27,8 @@ namespace Orchestrator
             var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Templates.{fileName}") ?? throw new Exception($"unable to load resource '{fileName}'");
             using var reader = new StreamReader(stream);
-            return reader.ReadToEnd();
+            var result = reader.ReadToEnd();
+            return result.Replace("\r\n", "\n");
         }
     }
 }

@@ -1,27 +1,22 @@
 ﻿using Azure.Core;
+using Azure.Identity;
 using Orchestrator;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json.Nodes;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Azure.Identity;
+using System.Text.Json.Nodes;
 
 namespace ConsoleApp
 {
-    public class DataVerseToolProvider : IToolProvider
+    public class DataVerseTools
     {
         private AccessToken? _accessToken;
 
-        public DataVerseToolProvider()
+        public DataVerseTools()
         {
         }
 
-        public Task<List<Tool>> GetToolsAsync()
+        public IEnumerable<Tool> GetTools()
         {
             var tools = new List<Tool>
             {
@@ -46,7 +41,7 @@ namespace ConsoleApp
                 ),
             };
 
-            return Task.FromResult(tools);
+            return tools;
         }
 
         private async Task<string> QueryWorkOrders(string query)

@@ -1,20 +1,20 @@
 ﻿namespace Orchestrator
 {
-    public class ReflectionToolProvider<T> : IToolProvider
+    public static class ReflectionToolProvider<T>
     {
-        private static List<Tool> _tools;
+        private static IEnumerable<Tool> _tools;
 
         static ReflectionToolProvider()
         {
             _tools = GetToolsFromClass();
         }
 
-        public Task<List<Tool>> GetToolsAsync()
+        public static IEnumerable<Tool> GetTools()
         {
-            return Task.FromResult(_tools);
+            return _tools;
         }
 
-        private static List<Tool> GetToolsFromClass()
+        private static IEnumerable<Tool> GetToolsFromClass()
         {
             var tools = new List<Tool>();
             foreach (var methodInfo in typeof(T).GetMethods())
