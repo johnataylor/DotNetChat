@@ -64,9 +64,11 @@ namespace Orchestrator
 
         private async Task<LlmResponse> RunLlmAsync(List<ChatMessage> messages)
         {
+            // TODO: despite our best efforts we sometimes do not have JSON - in which case we can only retry!
+
             var openAIClient = new OpenAIClient(_apiKey, new OpenAIClientOptions());
 
-            var chatCompletionOptions = new ChatCompletionsOptions { StopSequences = { "\nObservation:", "\n\tObservation:" } };
+            var chatCompletionOptions = new ChatCompletionsOptions();
 
             foreach (var message in messages)
             {
@@ -77,7 +79,15 @@ namespace Orchestrator
 
             var response = await openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionOptions);
 
-            return new LlmResponse(response.Value.Choices[0].Message.Content);
+            var finishReason = response.Value.Choices[0].FinishReason;
+
+            // TODO: finishReason should be stop
+
+            var content = response.Value.Choices[0].Message.Content;
+
+            ConsoleLogger.LogPromptResponse(content);
+
+            return new LlmResponse(content);
         }
 
         private class LlmResponse

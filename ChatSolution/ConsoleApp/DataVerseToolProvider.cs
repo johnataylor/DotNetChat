@@ -147,7 +147,8 @@ namespace ConsoleApp
                 {
                     await Console.Out.WriteLineAsync(ex.InnerException.Message);
                 }
-                throw;
+
+                return "no data available";
             }
         }
 
@@ -186,7 +187,8 @@ namespace ConsoleApp
                 {
                     await Console.Out.WriteLineAsync(ex.InnerException.Message);
                 }
-                throw;
+
+                return "no data available";
             }
         }
     }
