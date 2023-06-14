@@ -9,12 +9,14 @@ namespace Orchestrator
         private readonly IDictionary<string, Tool> _tools;
         private readonly MessageFactory _messageFactory;
         private readonly string _apiKey;
+        private readonly IScenarioLogger _scenarioLogger;
 
-        public ToolExecutor(IEnumerable<Tool> tools, MessageFactory messageFactory, string apiKey)
+        public ToolExecutor(IEnumerable<Tool> tools, MessageFactory messageFactory, string apiKey, IScenarioLogger scenarioLogger)
         {
             _tools = tools.ToDictionary(tool => tool.Name);
             _messageFactory = messageFactory;
             _apiKey = apiKey;
+            _scenarioLogger = scenarioLogger;
         }
 
         public async Task RunAsync(List<string> transcript)
@@ -25,11 +27,11 @@ namespace Orchestrator
             {
                 var llmResponse = await RunLlmAsync(messages);
 
-                ConsoleLogger.LogLlmResponse(llmResponse.ToJson());
+                _scenarioLogger.LogLlmResponse(llmResponse.ToJson());
 
                 if (llmResponse.Action == "Final Answer")
                 {
-                    ConsoleLogger.LogFinalAnswer();
+                    _scenarioLogger.LogFinalAnswer();
 
                     transcript.Add(llmResponse.ActionInput);
                     return;
@@ -40,7 +42,7 @@ namespace Orchestrator
                     {
                         var toolResponse = await tool.Function(llmResponse.ActionInput);
 
-                        ConsoleLogger.LogToolResponse(toolResponse);
+                        _scenarioLogger.LogToolResponse(toolResponse);
 
                         if (tool.ReturnDirect)
                         {
@@ -75,7 +77,7 @@ namespace Orchestrator
                 chatCompletionOptions.Messages.Add(message);
             }
 
-            ConsoleLogger.LogPrompt(chatCompletionOptions.Messages);
+            _scenarioLogger.LogPrompt(chatCompletionOptions.Messages);
 
             var response = await openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionOptions);
 
@@ -85,7 +87,7 @@ namespace Orchestrator
 
             var content = response.Value.Choices[0].Message.Content;
 
-            ConsoleLogger.LogPromptResponse(content);
+            _scenarioLogger.LogPromptResponse(content);
 
             return new LlmResponse(content);
         }

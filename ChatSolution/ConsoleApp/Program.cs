@@ -1,5 +1,4 @@
-﻿
-using ConsoleApp;
+﻿using DataVerseClient;
 using Orchestrator;
 
 internal class Program
@@ -39,17 +38,17 @@ internal class Program
             catch (Exception e)
             {
                 Console.WriteLine("exception...");
-                ConsoleLogger.LogException(e);
+                (new ConsoleLogger()).LogException(e);
             }
         }
 
         static IDialogEngine CreateDialogEngine()
         {
-            var dataVerseTools = new DataVerseTools();
+            var dataVerseTools = new DataVerseToolProvider();
 
             string apiKey = File.ReadAllText(@"C:\keys\openai.txt");
 
-            return new DialogEngine(dataVerseTools.GetTools(), apiKey);
+            return new DialogEngine(dataVerseTools.GetTools(new ConsoleLogger()), apiKey, new ConsoleLogger());
         }
     }
 }
